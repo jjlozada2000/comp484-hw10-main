@@ -15,7 +15,41 @@ $(function() {
         pet_info['name'] = $(this).val();
         updatePetInfoInHtml();
         showNotification("My name is " + pet_info['name'] + "!");
+        console.info('Pet name changed to: ' + pet_info['name']);
     });
+
+    // Log Info: general status message on page load
+    console.info('Gigapet loaded successfully');
+
+    // Log Table: display the initial pet_info object as a table
+    console.table(pet_info);
+
+    // Log Group: group startup logs together so they're easy to collapse in DevTools
+    console.group('Startup');
+    console.log('Buttons registered');
+    console.log('DOM ready');
+    console.groupEnd();
+
+    // Log Custom: styled message using %c directive
+    console.log('%cGigapet is running', 'color: #3a86ff; font-weight: bold; font-size: 14px;');
+
+    // Cause a 404 network error: requesting an image path that does not exist
+    var testImg = new Image();
+    testImg.src = 'images/does_not_exist.png';
+
+    // Cause a TypeError: trying to call a method on undefined
+    try {
+        var badValue = undefined;
+        badValue.toString();
+    } catch (e) {
+        console.error('TypeError caught: ' + e.message);
+    }
+
+    // Cause a Violation: forced layout/reflow by reading offsetWidth inside a loop
+    var box = document.querySelector('.pet-image-container');
+    for (var i = 0; i < 100; i++) {
+        var w = box.offsetWidth;
+    }
 })
 
 var pet_info = { name: "Squirtle", weight: 10, happiness: 5, cleanliness: 5 };
@@ -33,6 +67,7 @@ function clickedTreatButton() {
     pet_info['weight'] = pet_info['weight'] + 1;
     animatePet('bounce');
     showNotification("Yum! That treat was delicious!");
+    console.log('Treat given — happiness: ' + pet_info['happiness'] + ', weight: ' + pet_info['weight']);
     checkAndUpdatePetInfoInHtml();
 }
 
@@ -41,6 +76,7 @@ function clickedPlayButton() {
     pet_info['weight'] = pet_info['weight'] - 1;
     animatePet('bounce');
     showNotification("Woo! I love playing!");
+    console.log('Play session — happiness: ' + pet_info['happiness'] + ', weight: ' + pet_info['weight']);
     checkAndUpdatePetInfoInHtml();
 }
 
@@ -49,6 +85,7 @@ function clickedExerciseButton() {
     pet_info['weight'] = pet_info['weight'] - 2;
     animatePet('shake');
     showNotification("Ugh... I'm tired...");
+    console.log('Exercise done — happiness: ' + pet_info['happiness'] + ', weight: ' + pet_info['weight']);
     checkAndUpdatePetInfoInHtml();
 }
 
@@ -57,6 +94,7 @@ function clickedBathButton() {
     pet_info['happiness'] = pet_info['happiness'] - 1;
     animatePet('shake');
     showNotification("I hate baths... but I smell better now.");
+    console.log('Bath given — cleanliness: ' + pet_info['cleanliness']);
     checkAndUpdatePetInfoInHtml();
 }
 
@@ -67,9 +105,19 @@ function checkAndUpdatePetInfoInHtml() {
 
 function checkWeightAndHappinessBeforeUpdating() {
     // Prevent stats from going below zero
-    if (pet_info['weight'] < 0) { pet_info['weight'] = 0; }
-    if (pet_info['happiness'] < 0) { pet_info['happiness'] = 0; }
-    if (pet_info['cleanliness'] < 0) { pet_info['cleanliness'] = 0; }
+    if (pet_info['weight'] < 0) {
+        pet_info['weight'] = 0;
+        // Log Warning: stat hit the floor, something to keep an eye on
+        console.warn('Weight hit zero — further exercise or play will have no effect on weight');
+    }
+    if (pet_info['happiness'] < 0) {
+        pet_info['happiness'] = 0;
+        console.warn('Happiness hit zero — pet is not happy');
+    }
+    if (pet_info['cleanliness'] < 0) {
+        pet_info['cleanliness'] = 0;
+        console.warn('Cleanliness hit zero');
+    }
 }
 
 function updatePetInfoInHtml() {
